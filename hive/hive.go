@@ -492,7 +492,7 @@ func (h *Hive) LoadFileWithWorker(FilePath, TableName, fileType string, dateForm
 		manager.EndWorker()
 	}
 
-	wg.Wait()
+	//wg.Wait()
 
 	return retVal, err
 }
