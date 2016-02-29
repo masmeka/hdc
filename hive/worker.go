@@ -130,4 +130,6 @@ func (w *HiveWorker) Work(task string, wg *sync.WaitGroup) {
 
 	w.TimeProcess <- time.Now().Unix()
 	w.FreeWorkers <- w
+
+	wg.Wait()
 }
