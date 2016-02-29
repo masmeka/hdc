@@ -45,11 +45,11 @@ func (m *HiveManager) DoMonitor(wg *sync.WaitGroup) {
 	for {
 		select {
 		case task := <-m.Tasks:
-			wg.Add(1)
+			// wg.Add(1)
 			log.Println("Assign task to worker with task")
 			go m.AssignTask(task, wg)
 		case result := <-m.TimeProcess:
-			wg.Add(1)
+			// wg.Add(1)
 			log.Println("Process still in progress for ")
 			go m.InProgress(result, wg)
 		case <-m.Done:
@@ -62,10 +62,10 @@ func (m *HiveManager) DoMonitor(wg *sync.WaitGroup) {
 
 // assign task to free worker
 func (m *HiveManager) AssignTask(task string, wg *sync.WaitGroup) {
-	defer wg.Done()
+	// defer wg.Done()
 	select {
 	case worker := <-m.FreeWorkers:
-		wg.Add(1)
+		// wg.Add(1)
 		log.Println("Working task by ", worker.WorkerId)
 		go worker.Work(task, wg)
 	case isDone := <-m.Done:
@@ -77,13 +77,13 @@ func (m *HiveManager) AssignTask(task string, wg *sync.WaitGroup) {
 
 // check if a task still in progress to wait it till finish
 func (m *HiveManager) InProgress(result int64, wg *sync.WaitGroup) {
-	defer wg.Done()
+	// defer wg.Done()
 	m.LastProcess = int64(result)
 }
 
 // set the timeout to waiting for tasks execution
 func (m *HiveManager) Timeout(seconds int, wg *sync.WaitGroup) {
-	defer wg.Done()
+	// defer wg.Done()
 	for {
 		if time.Now().Unix()-m.LastProcess > int64(seconds) {
 			m.Done <- true
@@ -109,7 +109,7 @@ func (m *HiveManager) EndWorker() {
 
 // do a task for worker
 func (w *HiveWorker) Work(task string, wg *sync.WaitGroup) {
-	defer wg.Done()
+	// defer wg.Done()
 
 	if !w.IsConnOpen {
 		w.Context.Conn.Open()
