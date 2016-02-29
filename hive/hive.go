@@ -485,11 +485,11 @@ func (h *Hive) LoadFileWithWorker(FilePath, TableName, fileType string, dateForm
 		go manager.Timeout(3, &wg)
 		<-manager.Done
 
+		manager.EndWorker()
+
 		if err == nil {
 			retVal = "success"
 		}
-
-		manager.EndWorker()
 	}
 
 	//wg.Wait()
