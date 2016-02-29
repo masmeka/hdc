@@ -41,7 +41,7 @@ func NewHiveManager(numWorkers int) HiveManager {
 }
 
 // do monitoring worker thats free or not
-func (m *HiveManager) DoMonitor(wg *sync.WaitGroup) {
+func (m *HiveManager) DoMonitor() {
 	for {
 		select {
 		case task := <-m.Tasks:
@@ -61,7 +61,7 @@ func (m *HiveManager) DoMonitor(wg *sync.WaitGroup) {
 }
 
 // assign task to free worker
-func (m *HiveManager) AssignTask(task string, wg *sync.WaitGroup) {
+func (m *HiveManager) AssignTask(task string) {
 	// defer wg.Done()
 	select {
 	case worker := <-m.FreeWorkers:
@@ -76,13 +76,13 @@ func (m *HiveManager) AssignTask(task string, wg *sync.WaitGroup) {
 }
 
 // check if a task still in progress to wait it till finish
-func (m *HiveManager) InProgress(result int64, wg *sync.WaitGroup) {
+func (m *HiveManager) InProgress(result int64) {
 	// defer wg.Done()
 	m.LastProcess = int64(result)
 }
 
 // set the timeout to waiting for tasks execution
-func (m *HiveManager) Timeout(seconds int, wg *sync.WaitGroup) {
+func (m *HiveManager) Timeout(seconds int) {
 	// defer wg.Done()
 	for {
 		if time.Now().Unix()-m.LastProcess > int64(seconds) {
@@ -108,7 +108,7 @@ func (m *HiveManager) EndWorker() {
 }
 
 // do a task for worker
-func (w *HiveWorker) Work(task string, wg *sync.WaitGroup) {
+func (w *HiveWorker) Work(task string) {
 	// defer wg.Done()
 
 	if !w.IsConnOpen {

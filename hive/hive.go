@@ -416,7 +416,7 @@ func (h *Hive) LoadFileWithWorker(FilePath, TableName, fileType string, dateForm
 
 		// monitoring worker whos free
 		// wg.Add(1)
-		go manager.DoMonitor(&wg)
+		go manager.DoMonitor()
 
 		for scanner.Scan() {
 			mutex.Lock()
@@ -482,7 +482,7 @@ func (h *Hive) LoadFileWithWorker(FilePath, TableName, fileType string, dateForm
 
 		// waiting for tasks has been done
 		// wg.Add(1)
-		go manager.Timeout(3, &wg)
+		go manager.Timeout(3)
 		<-manager.Done
 
 		manager.EndWorker()
