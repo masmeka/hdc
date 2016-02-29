@@ -355,8 +355,8 @@ func (h *Hive) LoadFile(FilePath, TableName, fileType, dateFormat string, TableM
 
 // loading file with worker
 func (h *Hive) LoadFileWithWorker(FilePath, TableName, fileType string, dateFormat string, TableModel interface{}, TotalWorker int) (retVal string, err error) {
-	// var wg sync.WaitGroup
-	var mutex = &sync.Mutex{}
+	var wg sync.WaitGroup
+	//var mutex = &sync.Mutex{}
 
 	retVal = "process failed"
 	isMatch := false
@@ -415,8 +415,8 @@ func (h *Hive) LoadFileWithWorker(FilePath, TableName, fileType string, dateForm
 		}
 
 		// monitoring worker whos free
-		// wg.Add(1)
-		go manager.DoMonitor()
+		wg.Add(1)
+		go manager.DoMonitor(&wg)
 
 		for scanner.Scan() {
 			mutex.Lock()
@@ -481,18 +481,18 @@ func (h *Hive) LoadFileWithWorker(FilePath, TableName, fileType string, dateForm
 		}
 
 		// waiting for tasks has been done
-		// wg.Add(1)
-		go manager.Timeout(3)
+		wg.Add(1)
+		go manager.Timeout(3, &wg)
 		<-manager.Done
-
-		manager.EndWorker()
 
 		if err == nil {
 			retVal = "success"
 		}
+
+		manager.EndWorker()
 	}
 
-	//wg.Wait()
+	wg.Wait()
 
 	return retVal, err
 }
