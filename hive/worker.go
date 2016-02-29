@@ -47,11 +47,11 @@ func (m *HiveManager) DoMonitor() {
 		case task := <-m.Tasks:
 			// wg.Add(1)
 			log.Println("Assign task to worker with task")
-			go m.AssignTask(task, wg)
+			go m.AssignTask(task)
 		case result := <-m.TimeProcess:
 			// wg.Add(1)
 			log.Println("Process still in progress for ")
-			go m.InProgress(result, wg)
+			go m.InProgress(result)
 		case <-m.Done:
 			log.Println("Process Done 0!")
 			m.Done <- true
@@ -67,7 +67,7 @@ func (m *HiveManager) AssignTask(task string) {
 	case worker := <-m.FreeWorkers:
 		// wg.Add(1)
 		log.Println("Working task by ", worker.WorkerId)
-		go worker.Work(task, wg)
+		go worker.Work(task)
 	case isDone := <-m.Done:
 		log.Println("Process Done 1!")
 		m.Done <- isDone
