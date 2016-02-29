@@ -40,9 +40,12 @@ func NewHiveManager(numWorkers int) HiveManager {
 	return m
 }
 
+var counterMonitor int = 0
+
 // do monitoring worker thats free or not
 func (m *HiveManager) DoMonitor(wg *sync.WaitGroup) {
 	for {
+		log.Println("Monitor", counterMonitor)
 		select {
 		case task := <-m.Tasks:
 			wg.Add(1)
@@ -51,9 +54,11 @@ func (m *HiveManager) DoMonitor(wg *sync.WaitGroup) {
 			wg.Add(1)
 			go m.InProgress(result, wg)
 		case <-m.Done:
+			log.Println("End on ", counterMonitor)
 			m.Done <- true
 			return
 		}
+		counterMonitor = counterMonitor + 1
 	}
 }
 
