@@ -44,22 +44,24 @@ var counterMonitor int = 0
 
 // do monitoring worker thats free or not
 func (m *HiveManager) DoMonitor(wg *sync.WaitGroup) {
+	doTask := ""
 	for {
-		log.Println("Monitor", counterMonitor)
 		select {
 		case task := <-m.Tasks:
 			wg.Add(1)
-			log.Println("Assign for monitor", counterMonitor)
+			doTask = "Assign Task"
 			go m.AssignTask(task, wg)
 		case result := <-m.TimeProcess:
 			wg.Add(1)
-			log.Println("Progress for monitor", counterMonitor)
+			doTask = "In Progress"
 			go m.InProgress(result, wg)
 		case <-m.Done:
-			log.Println("End on ", counterMonitor)
+			doTask = "Process Done"
 			m.Done <- true
 			return
 		}
+
+		log.Println("Monitor", counterMonitor, doTask)
 		counterMonitor = counterMonitor + 1
 	}
 }
@@ -70,7 +72,6 @@ func (m *HiveManager) AssignTask(task string, wg *sync.WaitGroup) {
 	select {
 	case worker := <-m.FreeWorkers:
 		wg.Add(1)
-		log.Println("Preparing working ", task, worker.WorkerId)
 		go worker.Work(task, wg)
 	case isDone := <-m.Done:
 		m.Done <- isDone
@@ -103,7 +104,6 @@ func (m *HiveManager) EndWorker() {
 		case worker := <-m.FreeWorkers:
 			if worker.IsConnOpen {
 				worker.Context.Conn.Close()
-				log.Println("Connection closed", worker.WorkerId)
 			}
 		default:
 			return
@@ -118,7 +118,6 @@ func (w *HiveWorker) Work(task string, wg *sync.WaitGroup) {
 	if !w.IsConnOpen {
 		w.Context.Conn.Open()
 		w.IsConnOpen = true
-		log.Println("Open connection for ", w.WorkerId)
 	}
 
 	query := task
@@ -126,7 +125,6 @@ func (w *HiveWorker) Work(task string, wg *sync.WaitGroup) {
 		query += ";"
 	}
 	w.Context.Conn.SendInput(query)
-	log.Println("Do task ", task, w.WorkerId)
 
 	w.TimeProcess <- time.Now().Unix()
 	w.FreeWorkers <- w
