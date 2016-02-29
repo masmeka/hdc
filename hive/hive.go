@@ -483,6 +483,9 @@ func (h *Hive) LoadFileWithWorker(FilePath, TableName, fileType string, dateForm
 		// waiting for tasks has been done
 		wg.Add(1)
 		go manager.Timeout(3, &wg)
+
+		wg.Wait()
+
 		<-manager.Done
 
 		if err == nil {
