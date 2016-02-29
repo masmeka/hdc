@@ -46,11 +46,11 @@ func (m *HiveManager) DoMonitor(wg *sync.WaitGroup) {
 		select {
 		case task := <-m.Tasks:
 			wg.Add(1)
-			log.Println("Assign task to worker", worker.WorkerId)
+			log.Println("Assign task to worker with task")
 			go m.AssignTask(task, wg)
 		case result := <-m.TimeProcess:
 			wg.Add(1)
-			log.Println("Process still in progress for ", worker.WorkerId)
+			log.Println("Process still in progress for ")
 			go m.InProgress(result, wg)
 		case <-m.Done:
 			log.Println("Process Done 0!")
@@ -66,6 +66,7 @@ func (m *HiveManager) AssignTask(task string, wg *sync.WaitGroup) {
 	select {
 	case worker := <-m.FreeWorkers:
 		wg.Add(1)
+		log.Println("Working task by ", worker.WorkerId)
 		go worker.Work(task, wg)
 	case isDone := <-m.Done:
 		log.Println("Process Done 1!")
