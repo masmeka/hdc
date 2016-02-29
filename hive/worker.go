@@ -46,6 +46,7 @@ var counterMonitor int = 0
 func (m *HiveManager) DoMonitor(wg *sync.WaitGroup) {
 	doTask := ""
 	for {
+		log.Println("Task ", m.Tasks, counterMonitor)
 		select {
 		case task := <-m.Tasks:
 			wg.Add(1)
@@ -89,7 +90,8 @@ func (m *HiveManager) InProgress(result int64, wg *sync.WaitGroup) {
 func (m *HiveManager) Timeout(seconds int, wg *sync.WaitGroup) {
 	defer wg.Done()
 	for {
-		if time.Now().Unix()-m.LastProcess > int64(seconds) {
+		if timeDiff := time.Now().Unix() - m.LastProcess; timeDiff > int64(seconds) {
+			log.Println("Last Process", timeDiff, int64(seconds))
 			m.Done <- true
 			return
 		} else {
@@ -128,6 +130,4 @@ func (w *HiveWorker) Work(task string, wg *sync.WaitGroup) {
 
 	w.TimeProcess <- time.Now().Unix()
 	w.FreeWorkers <- w
-
-	wg.Wait()
 }
