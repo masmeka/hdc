@@ -513,7 +513,6 @@ func (h *Hive) CheckDataStructure(Tablename string, TableModel interface{}) (isM
 
 			for i := 0; i < v.NumField(); i++ {
 				if hr.Result != nil {
-					log.Printf("------- %d    %d\n", len(hr.Result), i)
 					line := strings.Split(strings.Replace(hr.Result[i], "'", "", -1), "\t")
 
 					if strings.ToLower(strings.TrimSpace(line[0])) == strings.ToLower(strings.TrimSpace(v.Field(i).Name)) {

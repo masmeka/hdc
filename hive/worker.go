@@ -46,14 +46,14 @@ func (m *HiveManager) DoMonitor() {
 		select {
 		case task := <-m.Tasks:
 			// wg.Add(1)
-			log.Println("Assign task to worker with task")
+			//log.Println("Assign task to worker with task")
 			go m.AssignTask(task)
 		case result := <-m.TimeProcess:
 			// wg.Add(1)
-			log.Println("Process still in progress for ")
+			//log.Println("Process still in progress for ")
 			go m.InProgress(result)
 		case <-m.Done:
-			log.Println("Process Done 0!")
+			//log.Println("Process Done 0!")
 			m.Done <- true
 			return
 		}
@@ -66,10 +66,10 @@ func (m *HiveManager) AssignTask(task string) {
 	select {
 	case worker := <-m.FreeWorkers:
 		// wg.Add(1)
-		log.Println("Working task by ", worker.WorkerId)
+		//log.Println("Working task by ", worker.WorkerId)
 		go worker.Work(task)
 	case isDone := <-m.Done:
-		log.Println("Process Done 1!")
+		//log.Println("Process Done 1!")
 		m.Done <- isDone
 		return
 	}
@@ -116,12 +116,12 @@ func (w *HiveWorker) Work(task string) {
 		w.IsConnOpen = true
 	}
 
-	log.Println("Do task ", task)
 	query := task
 	if strings.LastIndex(query, ";") == -1 {
 		query += ";"
 	}
 	w.Context.Conn.SendInput(query)
+	log.Println("Do task ", task, w.WorkerId)
 
 	w.TimeProcess <- time.Now().Unix()
 	w.FreeWorkers <- w
