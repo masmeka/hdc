@@ -78,7 +78,6 @@ func (d *DuplexTerm) Close() {
 }
 
 func (d *DuplexTerm) SendInput(input string) (res HiveResult, err error) {
-	log.Printf("---- %#v\n", input)
 	if d.FnReceive != nil {
 		done := make(chan bool)
 		go func() {
@@ -97,6 +96,7 @@ func (d *DuplexTerm) SendInput(input string) (res HiveResult, err error) {
 		} else {
 			err = d.Writer.Flush()
 		}
+		log.Printf("---- Receive Ok %#v\n", input)
 
 		<-done
 		d.FnReceive = nil
@@ -120,6 +120,7 @@ func (d *DuplexTerm) SendInput(input string) (res HiveResult, err error) {
 			}()
 			<-done
 		}
+		log.Printf("---- Receive Not Ok %#v\n", input)
 	}
 	return
 }
