@@ -103,6 +103,7 @@ func (m *HiveManager) EndWorker() {
 		case worker := <-m.FreeWorkers:
 			if worker.IsConnOpen {
 				worker.Context.Conn.Close()
+				log.Println("Connection closed", worker.WorkerId)
 			}
 		default:
 			return
