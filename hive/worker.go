@@ -63,6 +63,7 @@ func (m *HiveManager) AssignTask(task string, wg *sync.WaitGroup) {
 	select {
 	case worker := <-m.FreeWorkers:
 		wg.Add(1)
+		log.Println("Preparing working ", task, worker.WorkerId)
 		go worker.Work(task, wg)
 	case isDone := <-m.Done:
 		m.Done <- isDone
