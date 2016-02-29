@@ -5,7 +5,7 @@ import (
 	"errors"
 	"github.com/eaciit/errorlib"
 	"io"
-	// "log"
+	"log"
 	"os/exec"
 	"strings"
 )
@@ -78,6 +78,7 @@ func (d *DuplexTerm) Close() {
 }
 
 func (d *DuplexTerm) SendInput(input string) (res HiveResult, err error) {
+	log.Printf("---- %#v\n", input)
 	if d.FnReceive != nil {
 		done := make(chan bool)
 		go func() {

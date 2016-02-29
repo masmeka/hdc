@@ -110,6 +110,7 @@ func (w *HiveWorker) Work(task string, wg *sync.WaitGroup) {
 	if !w.IsConnOpen {
 		w.Context.Conn.Open()
 		w.IsConnOpen = true
+		log.Println("Open connection for ", w.WorkerId)
 	}
 
 	query := task
