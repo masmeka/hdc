@@ -44,25 +44,21 @@ var counterMonitor int = 0
 
 // do monitoring worker thats free or not
 func (m *HiveManager) DoMonitor(wg *sync.WaitGroup) {
-	doTask := ""
 	for {
-		log.Println("Task ", m.Tasks, counterMonitor)
 		select {
 		case task := <-m.Tasks:
 			wg.Add(1)
-			doTask = "Assign Task"
 			go m.AssignTask(task, wg)
 		case result := <-m.TimeProcess:
 			wg.Add(1)
-			doTask = "In Progress"
 			go m.InProgress(result, wg)
 		case <-m.Done:
-			doTask = "Process Done"
+			wg.Add(1)
+			go m.EndWorker(wg * sync.WaitGroup)
 			m.Done <- true
 			return
 		}
 
-		log.Println("Monitor", counterMonitor, doTask)
 		counterMonitor = counterMonitor + 1
 	}
 }
@@ -91,7 +87,6 @@ func (m *HiveManager) Timeout(seconds int, wg *sync.WaitGroup) {
 	defer wg.Done()
 	for {
 		if timeDiff := time.Now().Unix() - m.LastProcess; timeDiff > int64(seconds) {
-			log.Println("Last Process", timeDiff, int64(seconds))
 			m.Done <- true
 			return
 		} else {
@@ -100,7 +95,8 @@ func (m *HiveManager) Timeout(seconds int, wg *sync.WaitGroup) {
 	}
 }
 
-func (m *HiveManager) EndWorker() {
+func (m *HiveManager) EndWorker(wg *sync.WaitGroup) {
+	defer wg.Done()
 	for {
 		select {
 		case worker := <-m.FreeWorkers:
