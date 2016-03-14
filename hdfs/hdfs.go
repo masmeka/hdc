@@ -4,12 +4,14 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
+	"log"
 	"net"
 	"net/http"
 	"os"
 	"os/user"
 	"strings"
 	"time"
+	//"fmt"
 )
 
 // Constant
@@ -103,7 +105,7 @@ func (h *WebHdfs) makePath(path string, op string, parms map[string]string) stri
 	return s
 }
 
-func (h *WebHdfs) call(calltype, path, op string, parms map[string]string) (*http.Response, error) {
+/*func (h *WebHdfs) call(calltype, path, op string, parms map[string]string) (*http.Response, error) {
 	url := ""
 	if strings.HasPrefix(path, "http") == false {
 		url = h.makePath(path, op, parms)
@@ -117,9 +119,30 @@ func (h *WebHdfs) call(calltype, path, op string, parms map[string]string) (*htt
 		return nil, err
 	}
 	return h.client.Do(req)
+}*/
+
+func (h *WebHdfs) call(calltype, path, op string, parms map[string]string) (*http.Response, error) {
+	url := ""
+	if strings.HasPrefix(path, "http") == false {
+		url = h.makePath(path, op, parms)
+	} else {
+		url = path
+	}
+	//return nil, errors.New(url)
+
+	timeout := time.Duration(5 * time.Second)
+	req, err := http.NewRequest(calltype, url, nil)
+	client := http.Client{
+		Timeout: timeout,
+	}
+	res, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	return res, err
 }
 
-func (h *WebHdfs) callPayload(calltype, path, op string, filename string, parms map[string]string) (*http.Response, error) {
+/*func (h *WebHdfs) callPayload(calltype, path, op string, filename string, parms map[string]string) (*http.Response, error) {
 	url := ""
 	if strings.HasPrefix(path, "http") == false {
 		url = h.makePath(path, op, parms)
@@ -138,11 +161,38 @@ func (h *WebHdfs) callPayload(calltype, path, op string, filename string, parms 
 		return nil, err
 	}
 	return h.client.Do(req)
+}*/
+
+func (h *WebHdfs) callPayload(calltype, path, op string, filename string, parms map[string]string) (*http.Response, error) {
+	url := ""
+	if strings.HasPrefix(path, "http") == false {
+		url = h.makePath(path, op, parms)
+	} else {
+		url = path
+	}
+
+	payload, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+	defer payload.Close()
+
+	timeout := time.Duration(5 * time.Second)
+	req, err := http.NewRequest(calltype, url, payload)
+	client := http.Client{
+		Timeout: timeout,
+	}
+	res, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	return res, err
 }
 
 func handleRespond(r *http.Response) (*HdfsData, error) {
 	hdata := new(HdfsData)
 	data, e := ioutil.ReadAll(r.Body)
+	log.Println(string(r.Header.Get("")))
 	defer r.Body.Close()
 	if e != nil {
 		return hdata, e

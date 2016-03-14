@@ -63,7 +63,8 @@ func TestChangeOwner(t *testing.T) {
 */
 
 func TestPutFile(t *testing.T) {
-	e = h.Put("d://test.txt", "/user/ariefdarmawan/inbox/test.txt", "", nil)
+	//e = h.Put("d://test.txt", "/user/ariefdarmawan/inbox/test.txt", "", nil)
+	e = h.Put("/home/developer/test.txt", "/user/ariefdarmawan/inbox/test.txt", "", nil)
 	if e != nil {
 		t.Error(e.Error())
 	}
@@ -77,3 +78,20 @@ func TestGetStatus(t *testing.T) {
 		fmt.Printf("Data Processed :\n%v\n", len(hdata.FileStatuses.FileStatus))
 	}
 }
+
+func TestSetPermission(t *testing.T) {
+	e = h.SetPermission("/user/ariefdarmawan/inbox/test.txt", "777")
+	if e != nil {
+		t.Error(e.Error())
+	}
+}
+
+/*
+func TestCreateNewFile(t *testing.T) {
+	fmt.Println(os.Getenv("HOME"))
+	e = h.CreateNewFile("/user/ariefdarmawan/inbox/", "text2.txt", "755")
+	if e != nil {
+		t.Error(e.Error())
+	}
+}
+*/

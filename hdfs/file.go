@@ -5,9 +5,11 @@ import (
 	//"fmt"
 	"io/ioutil"
 	//"log"
+	"github.com/eaciit/colony-core/v0"
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"sync"
 )
 
@@ -64,7 +66,7 @@ func mergeMapString(source map[string]string, adds map[string]string) map[string
 	return source
 }
 
-func (h *WebHdfs) Put(localfile string, destination string, permission string, parms map[string]string) error {
+func (h *WebHdfs) Put(localfile string, destination string, permission string, parms map[string]string, server *colonycore.Server) error {
 	if permission == "" {
 		permission = "755"
 	}
@@ -78,6 +80,14 @@ func (h *WebHdfs) Put(localfile string, destination string, permission string, p
 	}
 
 	location := r.Header["Location"][0]
+	if server != nil {
+		for _, alias := range server.HostAlias {
+			if strings.Contains(strings.Split(location, ":")[1], alias.HostName) {
+				location = strings.Replace(location, alias.HostName, alias.IP, 1)
+				break
+			}
+		}
+	}
 
 	r, err = h.callPayload("PUT", location, OP_CREATE, localfile, nil)
 	if err != nil {
@@ -178,6 +188,50 @@ func (h *WebHdfs) SetOwner(path string, owner string, group string) error {
 	return nil
 }
 
-func (h *WebHdfs) SetPermission(path string, user string) error {
+func (h *WebHdfs) SetPermission(path string, permission string) error {
+	if permission == "" {
+		permission = "755"
+	}
+
+	parms := map[string]string{}
+	parms["permission"] = permission
+
+	r, e := h.call("PUT", path, OP_SETPERMISSION, parms)
+	if e != nil {
+		return e
+	}
+	if r.StatusCode != 200 {
+		return errors.New("Invalid Response Header on OP_SETPERMISSION: " + r.Status)
+	}
 	return nil
 }
+
+/*
+func (h *WebHdfs) CreateNewFile(path, filename, permission string) error {
+	if permission == "" {
+		permission = "755"
+	}
+
+	parms := map[string]string{}
+	parms["permission"] = permission
+
+	var fullpath string
+
+	if string(path[len(path)-1]) == "/" {
+		fullpath = path + filename
+	} else {
+		fullpath = path + "/" + filename
+	}
+
+	log.Println(fullpath)
+
+	r, e := h.call("PUT", fullpath, OP_CREATE, parms)
+	if e != nil {
+		return e
+	}
+	if r.StatusCode != 200 {
+		return errors.New("Invalid Response Header on OP_CREATE: " + r.Status)
+	}
+	return nil
+}
+*/
